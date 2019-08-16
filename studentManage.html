@@ -36,20 +36,25 @@
                                 }
                                 break;
                             case 'add-student':
-                                if (addNode) {
-                                    var studentItem = new Ext.tree.TreeNode({ text: 'NewStudent', icon: 'image/student.png' });
+                                var studentItem = new Ext.tree.TreeNode({ text: 'NewStudent', icon: 'image/student.png' });
+                                if (!addNode.leaf) {
                                     addNode.appendChild(studentItem);
-                                    treeEditor.editNode = studentItem;
-                                    treeEditor.startEdit(studentItem.ui.textNode,'');
+                                } else {
+                                    addNode.parentNode.appendChild(studentItem);
                                 }
+                                treeEditor.editNode = studentItem;
+                                treeEditor.startEdit(studentItem.ui.textNode, '');
                                 break;
                             case 'add-class':
-                                if (addNode.parentNode) {
+                                if (addNode.leaf) {
+                                    Ext.Msg.alert('error', 'cann not add class for student');
+                                } else {
                                     var classItem = new Ext.tree.TreeNode({ text: 'NewClass', icon: 'image/class.png' });
                                     addNode.parentNode.appendChild(classItem);
                                     treeEditor.editNode = classItem;
-                                    treeEditor.startEdit(classItem.ui.textNode,'');
+                                    treeEditor.startEdit(classItem.ui.textNode, '');
                                 }
+
                                 break;
                         }
                     }
