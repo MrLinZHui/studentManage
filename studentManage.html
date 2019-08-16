@@ -14,6 +14,8 @@
         Ext.QuickTips.init();
         Ext.onReady(function () {
             var addNode = null;
+            var beforeMoveNode = null;
+            var childNode = null;
             var menu = new Ext.menu.Menu({
                 items: [{
                     id: 'delete-node',
@@ -28,7 +30,6 @@
                 listeners: {
                     itemclick: function (item) {
                         document.getElementById("hidebg").style.display = "none";
-                        //var addNode = item.parentMenu.contextNode;
                         switch (item.id) {
                             case 'delete-node':
                                 if (addNode.parentNode) {
@@ -36,8 +37,12 @@
                                 }
                                 break;
                             case 'add-student':
-                                var studentItem = new Ext.tree.TreeNode({ text: 'NewStudent', icon: 'image/student.png' });
-                                if (!addNode.leaf) {
+                                var studentItem = new Ext.tree.TreeNode({ text: 'NewStudent', icon: 'image/student.png' ,leaf:true});
+                                if(!addNode.parentNode){
+                                    Ext.Msg.alert('error', 'root cann not add student');
+                                    break;
+                                }
+                                else if (!addNode.leaf) {
                                     addNode.appendChild(studentItem);
                                 } else {
                                     addNode.parentNode.appendChild(studentItem);
@@ -93,8 +98,16 @@
                         c.showAt(e.getXY());
 
                     },
+                    'beforeremove':function(tree,thisnode,oldparent){
+                        beforeMoveNode = thisnode;
+                        childNode = oldparent;
+                    },
                     'nodedrop': function (node) {
-                        Ext.Msg.alert('Drag Event', 'currently dragging node: ' + node.dropNode.text + 'dropping into node: ' + node.target.text + 'dragging pattern is' + node.point);
+                        if(!node.target.parentNode){
+                            node.target.remove(childNode);
+                            beforeMoveNode.appendChild(childNode);
+                            Ext.Msg.alert('Error', node.target.text+' is not a class');
+                        }
                     }
                 }
             });
@@ -112,16 +125,16 @@
                 if (addNode === null) {
                     Ext.Msg.alert('Error', 'please enter select leaf');
                     return;
+                }else if(!addNode.parentNode){
+                    Ext.Msg.alert('Error', 'root can not add node');
+                    return;
                 }
                 var text = addItem.dom.value;
                 if (addNode.leaf) {
-                    addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/student.png' }));
+                    addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/student.png',leaf:true }));
                 } else {
                     addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/class.png' }));
                 }
-                //var newItem = ;
-
-                //tree.appendChild(newItem);
             })
         });
     </script>
