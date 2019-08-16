@@ -1,0 +1,9 @@
+[
+     {text:'Gibraltar',qtip: '直布罗陀',expanded:true,icon:'image/class.png',children:[
+        {text:'Tomi',qtip: 'Tomi Lin',icon:'image/student.png',leaf:true},
+        {text:'Cyril',qtip: 'Cyril Yao',icon:'image/student.png',leaf:true}
+    ]},
+    {text:'Bering',qtip: '白令',expanded:true,icon:'image/class.png',children:[]},
+    {text:'Panama',qtip: '巴拿马',expanded:true,icon:'image/class.png',children:[]},
+    {text:'Suyz',qtip: '苏伊士',expanded:true,icon:'image/class.png',children:[]}
+]

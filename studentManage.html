@@ -1,0 +1,148 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>ViewPoint</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script type="text/javascript" src="/ext-base.js"></script>
+    <script type="text/javascript" src="/ext-all.js"></script>
+    <link rel="stylesheet" type="text/css" href="/ext-all.css">
+    <!-- <script type="text/javascript" src="/ext-all-debug.js"></script> -->
+    <script type="text/javascript" src="localXHR.js"></script>
+    <script type="text/javascript">
+        Ext.QuickTips.init();
+        Ext.onReady(function () {
+            var addNode = null;
+            var menu = new Ext.menu.Menu({
+                items: [{
+                    id: 'delete-node',
+                    text: 'Delete Node'
+                }, {
+                    id: 'add-student',
+                    text: 'Add student'
+                }, {
+                    id: 'add-class',
+                    text: 'Add class'
+                }],
+                listeners: {
+                    itemclick: function (item) {
+                        document.getElementById("hidebg").style.display = "none";
+                        //var addNode = item.parentMenu.contextNode;
+                        switch (item.id) {
+                            case 'delete-node':
+                                if (addNode.parentNode) {
+                                    addNode.remove();
+                                }
+                                break;
+                            case 'add-student':
+                                if (addNode) {
+                                    var studentItem = new Ext.tree.TreeNode({ text: 'NewStudent', icon: 'image/student.png' });
+                                    addNode.appendChild(studentItem);
+                                    treeEditor.editNode = studentItem;
+                                    treeEditor.startEdit(studentItem.ui.textNode,'');
+                                }
+                                break;
+                            case 'add-class':
+                                if (addNode.parentNode) {
+                                    var classItem = new Ext.tree.TreeNode({ text: 'NewClass', icon: 'image/class.png' });
+                                    addNode.parentNode.appendChild(classItem);
+                                    treeEditor.editNode = classItem;
+                                    treeEditor.startEdit(classItem.ui.textNode,'');
+                                }
+                                break;
+                        }
+                    }
+                }
+            })
+            var tree = new Ext.tree.TreePanel({
+                renderTo: 'test',
+                animate: true,
+                contextMenu: menu,
+                line: true,
+                enableDD: true,
+                width: 200,
+                height: 200,
+                selModel: new Ext.tree.MultiSelectionModel(
+                    {
+                        onNodeClick: function (node, e) {
+                            this.select(node, e, (e.shiftKey && e.ctrlKey));
+                        }
+                    }
+                ),
+                loader: new Ext.tree.TreeLoader({ dataUrl: 'student.txt' }),
+                root: new Ext.tree.AsyncTreeNode({ text: 'ITA', icon: 'image/school.png', expanded: true }),
+                listeners: {
+                    'click': function (node) {
+                        //Ext.Msg.alert('Tree Event', 'you clicked node:' + node.text);
+                        addNode = node;
+                    },
+                    'contextmenu': function (node, e) {
+                        addNode = node;
+                        node.select();
+                        var hideobj = document.getElementById("hidebg");
+                        hidebg.style.display = "block";
+                        hidebg.style.height = 969 + 'px';
+                        var c = node.getOwnerTree().contextMenu;
+                        c.contextNode = node;
+                        c.showAt(e.getXY());
+
+                    },
+                    'nodedrop': function (node) {
+                        Ext.Msg.alert('Drag Event', 'currently dragging node: ' + node.dropNode.text + 'dropping into node: ' + node.target.text + 'dragging pattern is' + node.point);
+                    }
+                }
+            });
+            var treeEditor = new Ext.tree.TreeEditor(tree, { allowBlank: false }, {
+                listeners: {
+                    complete: function (editor, currVal, origVal) {
+                        if (origVal.includes('车')) {
+                            editor.editNode.setCls('red-text')
+                        }
+                    }
+                }
+            });
+            var addItem = Ext.get('input');
+            Ext.get('add').on('click', function () {
+                if (addNode === null) {
+                    Ext.Msg.alert('Error', 'please enter select leaf');
+                    return;
+                }
+                var text = addItem.dom.value;
+                if (addNode.leaf) {
+                    addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/student.png' }));
+                } else {
+                    addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/class.png' }));
+                }
+                //var newItem = ;
+
+                //tree.appendChild(newItem);
+            })
+        });
+    </script>
+    <style type="text/css">
+        .red-text span {
+            color: red !important;
+        }
+
+        #hidebg {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            background-color: #000;
+            width: 100%;
+            filter: alpha(opacity=60);
+            opacity: 0.6;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="hidebg"></div>
+    <div id='test'></div>
+    <input id='input' type="text" placeholder="input student or class">
+    <button id='add'>add</button>
+</body>
+
+</html>
