@@ -13,9 +13,17 @@
     <script type="text/javascript">
         Ext.QuickTips.init();
         Ext.onReady(function () {
+            var firstclickItem = 0;
+            var secondclickItem = 0;
+            var clickNumber = 0;
             var addNode = null;
             var beforeMoveNode = null;
             var childNode = null;
+            var addItems = function (node, newItem) {
+                node.appendChild(newItem);
+                treeEditor.editNode = newItem;
+                treeEditor.startEdit(newItem.ui.textNode, '');
+            }
             var menu = new Ext.menu.Menu({
                 items: [{
                     id: 'delete-node',
@@ -37,29 +45,24 @@
                                 }
                                 break;
                             case 'add-student':
-                                var studentItem = new Ext.tree.TreeNode({ text: 'NewStudent', icon: 'image/student.png' ,leaf:true});
-                                if(!addNode.parentNode){
+                                var studentItem = new Ext.tree.TreeNode({ text: 'NewStudent', icon: 'image/student.png', leaf: true });
+                                if (!addNode.parentNode) {
                                     Ext.Msg.alert('error', 'root cann not add student');
                                     break;
                                 }
-                                else if (!addNode.leaf) {
-                                    addNode.appendChild(studentItem);
+                                if (addNode.leaf) {
+                                    addItems(addNode.parentNode,studentItem)
                                 } else {
-                                    addNode.parentNode.appendChild(studentItem);
+                                    addItems(addNode, studentItem);
                                 }
-                                treeEditor.editNode = studentItem;
-                                treeEditor.startEdit(studentItem.ui.textNode, '');
                                 break;
                             case 'add-class':
+                                var classItem = new Ext.tree.TreeNode({ text: 'NewClass', icon: 'image/class.png' });
                                 if (addNode.leaf) {
                                     Ext.Msg.alert('error', 'cann not add class for student');
                                 } else {
-                                    var classItem = new Ext.tree.TreeNode({ text: 'NewClass', icon: 'image/class.png' });
-                                    addNode.parentNode.appendChild(classItem);
-                                    treeEditor.editNode = classItem;
-                                    treeEditor.startEdit(classItem.ui.textNode, '');
+                                    addItems(addNode.parentNode,classItem)
                                 }
-
                                 break;
                         }
                     }
@@ -73,18 +76,11 @@
                 enableDD: true,
                 width: 200,
                 height: 200,
-                selModel: new Ext.tree.MultiSelectionModel(
-                    {
-                        onNodeClick: function (node, e) {
-                            this.select(node, e, (e.shiftKey && e.ctrlKey));
-                        }
-                    }
-                ),
+                selModel: new Ext.tree.MultiSelectionModel(),
                 loader: new Ext.tree.TreeLoader({ dataUrl: 'student.txt' }),
                 root: new Ext.tree.AsyncTreeNode({ text: 'ITA', icon: 'image/school.png', expanded: true }),
                 listeners: {
                     'click': function (node) {
-                        //Ext.Msg.alert('Tree Event', 'you clicked node:' + node.text);
                         addNode = node;
                     },
                     'contextmenu': function (node, e) {
@@ -98,15 +94,15 @@
                         c.showAt(e.getXY());
 
                     },
-                    'beforeremove':function(tree,thisnode,oldparent){
+                    'beforeremove': function (tree, thisnode, oldparent) {
                         beforeMoveNode = thisnode;
                         childNode = oldparent;
                     },
                     'nodedrop': function (node) {
-                        if(!node.target.parentNode){
+                        if (!node.target.parentNode) {
                             node.target.remove(childNode);
                             beforeMoveNode.appendChild(childNode);
-                            Ext.Msg.alert('Error', node.target.text+' is not a class');
+                            Ext.Msg.alert('Error', node.target.text + ' is not a class');
                         }
                     }
                 }
@@ -125,13 +121,13 @@
                 if (addNode === null) {
                     Ext.Msg.alert('Error', 'please enter select leaf');
                     return;
-                }else if(!addNode.parentNode){
+                } else if (!addNode.parentNode) {
                     Ext.Msg.alert('Error', 'root can not add node');
                     return;
                 }
                 var text = addItem.dom.value;
                 if (addNode.leaf) {
-                    addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/student.png',leaf:true }));
+                    addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/student.png', leaf: true }));
                 } else {
                     addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/class.png' }));
                 }
