@@ -116,6 +116,10 @@
                     }
                 }
             });
+            var filter = new Ext.tree.TreeFilter(tree, {
+                clearBlank: true,
+                autoClear: true
+            });
             var addItem = Ext.get('input');
             Ext.get('add').on('click', function () {
                 if (addNode === null) {
@@ -131,7 +135,31 @@
                 } else {
                     addNode.parentNode.appendChild(new Ext.tree.TreeNode({ text: text, icon: 'image/class.png' }));
                 }
-            })
+            });
+            var hiddenPkgs = [];
+            var field = Ext.get('filter');
+            field.on('keyup', function () {
+                var text = field.dom.value;
+                Ext.each(hiddenPkgs, function (n) {
+                    n.ui.show();
+                });
+                if (!text) {
+                    filter.clear();
+                    return;
+                }
+                tree.expandAll();
+                 var re = new RegExp(Ext.escapeRe(text), 'i');
+                filter.filterBy(function (n) {
+                    return !n.isLeaf() || re.test(n.text);
+                });
+                hiddenPkgs = [];
+                tree.root.cascade(function (n) {
+                    if (!n.isLeaf() && n.ui.ctNode.offsetHeight < 3) {
+                        n.ui.hide();
+                        hiddenPkgs.push(n);
+                    }
+                });
+            });
         });
     </script>
     <style type="text/css">
@@ -154,9 +182,12 @@
 
 <body>
     <div id="hidebg"></div>
+    <input id='filter' type="text" placeholder="input student name" style="width: 195px ">
     <div id='test'></div>
-    <input id='input' type="text" placeholder="input student or class">
+    <input id='input' type="text" placeholder="input student or class"  style="width: 153px ">
     <button id='add'>add</button>
+    <br>
+
 </body>
 
 </html>
